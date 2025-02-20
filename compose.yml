@@ -25,27 +25,28 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
   dns-server:
-    image: technitium/dns-server:latest
+    image: pihole/pihole:latest
     ports:
       - 53:53/udp
       - 53:53/tcp
-      - 5380:5380
-      - 53443:53443 # https web console
       #- 67:67/udp # dhcp
     labels:
       - traefik.enable=true
       - traefik.http.routers.dns.rule=Host(`dns.internal.prstat.org`)
       - traefik.http.routers.dns.service=dns
-      - traefik.http.services.dns.loadbalancer.server.port=5380
     environment:
       DNS_SERVER_DOMAIN: internal.prstat.org
+      TZ: 'Australia/Canberra'
+      FTLCONF_dns_listeningMode: 'all'
     volumes:
-      - config:/etc/dns
+      - config:/etc/pihole
     restart: unless-stopped
     networks:
       - traefik
     sysctls:
       - net.ipv4.ip_local_port_range=1024 65000
+    cap_add:
+      - NET_ADMIN
 volumes:
   config:
 networks:
