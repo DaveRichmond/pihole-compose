@@ -31,6 +31,8 @@ services:
       #- 67:67/udp # dhcp
     labels:
       - traefik.enable=true
+      # the following is for setting up the initial dns records
+      #- traefik.http.routers.dns.rule=Host(`dns.internal.prstat.org`) || PathPrefix(`/admin`) || PathPrefix(`/api`)
       - traefik.http.routers.dns.rule=Host(`dns.internal.prstat.org`)
       - traefik.http.services.dns.loadbalancer.server.port=80
       #- traefik.http.middlewares.dns.addprefix.prefix=/admin # FIXME
@@ -47,6 +49,15 @@ services:
       - net.ipv4.ip_local_port_range=1024 65000
     cap_add:
       - NET_ADMIN
+  wud:
+    image: getwud/wud
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.wud.rule=Host(`dns-updates.internal.prstat.org`)
+      - traefik.http.services.wud.loadbalancer.server.port=3000
 volumes:
   config:
 networks:
